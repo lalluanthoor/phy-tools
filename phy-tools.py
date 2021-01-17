@@ -40,3 +40,6 @@ def vasp(config, vasp_source):
     from vasp.install import Installer
     vasp_installer = Installer(config)
     vasp_installer.install()
+    click.echo("Installation of VASP completed.", file=config.log_file)
+    click.echo("VASP binaries 'vasp_std', 'vasp_gam' and 'vasp_ncl' installed.", file=config.log_file)
+    click.echo("Run 'source ~/.bashrc' or open a new terminal to start using VASP.", file=config.log_file)

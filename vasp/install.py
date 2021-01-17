@@ -176,5 +176,5 @@ class Installer(object):
 
     def post_installation(self):
         vasp_dir = os.path.join(self.config.dest_dir, "vasp.5.4.4", "bin")
-        bash_rc = os.path.join(os.path.abspath("~"), ".bashrc")
+        bash_rc = os.path.join(os.path.expanduser("~"), ".bashrc")
         self.os_helper.append_file(bash_rc, "export PATH=$PATH:%s" % vasp_dir)

@@ -25,7 +25,7 @@ class OsHelper(object):
             raise Exception("Unsupported platform %s" % self.system)
         if self.config.verbose:
             click.echo("Checking for variant 'Ubuntu' in version.", file=self.config.log_file)
-        if self.system == "Linux" and "Ubuntu" not in self.version:
+        if "Ubuntu" not in self.version:
             raise Exception("Unsupported variant %s. Only 'Ubuntu' supported." % self.version)
 
         if not os.path.exists(self.config.dest_dir):
