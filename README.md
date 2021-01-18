@@ -1,6 +1,6 @@
 # phy-tools
 Installation kit for material simulation tools. Currently supports:
-- VASP
+- VASP 5.4.4
 
 In progress:
 - Siesta
@@ -9,16 +9,18 @@ In progress:
 ## How to use this tool
 
 ### Prerequisites
-It is only tested with Ubuntu 18.04 and Python 3. Rest of the platforms may or may not work.
+It is only tested with Ubuntu 18.04 and 20.04 and Python 3. Rest of the platforms may or may not work.
 
 ### Steps to install
 ```bash
-sudo apt install -y python3-pip
-pip3 install virtualenv
-git clone https://github.com/lalluanthoor/phytools.git
-cd phytools
-python3 -m virtualenv venv
-. venv/bin/activate
-pip3 install .
+pip3 install phytools
+```
+
+### Accessing documentation
+```bash
 phytools --help
 ```
+
+## Notice
+VASP source is licensed content. It is not shipped with this tool. You need to obtain it from the authorized parties. See: https://www.vasp.at/faqs/
+

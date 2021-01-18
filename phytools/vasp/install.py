@@ -1,6 +1,6 @@
 import click
-from helper.oshelper import OsHelper
-from helper.nethelper import NetHelper
+from phytools.helper import OsHelper
+from phytools.helper.nethelper import NetHelper
 import os
 
 VASP_MAKE_CONFIG = """
