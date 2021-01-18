@@ -6,7 +6,7 @@ with open("README.md", "r", "utf-8") as readme:
 
 setup(
     name="phytools",
-    version="0.1.0",
+    version="0.1.1",
     description="An installer toolkit for installing a bunch of common simulation tools",
     long_description=README,
     long_description_content_type="text/markdown",
