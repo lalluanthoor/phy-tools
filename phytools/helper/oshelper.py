@@ -1,10 +1,11 @@
-import click
 import os
 import platform
 import subprocess
 
+import click
 
-class OsHelper(object):
+
+class OsHelper:
 
     def __init__(self, config):
         self.config = config
@@ -19,8 +20,9 @@ class OsHelper(object):
     def validate(self):
         supported_platforms = ["Linux", ]
         if self.config.verbose:
-            click.echo("Validating against supported platforms %s." % ", ".join(supported_platforms),
-                       file=self.config.log_file)
+            click.echo(
+                "Validating against supported platforms %s." % ", ".join(supported_platforms),
+                file=self.config.log_file)
         if self.system not in supported_platforms:
             raise Exception("Unsupported platform %s" % self.system)
         if self.config.verbose:
@@ -35,12 +37,15 @@ class OsHelper(object):
         if cwd == "":
             cwd = self.config.dest_dir
         if self.config.verbose:
-            click.echo("Running command %s from %s." % (" ".join(command), cwd), file=self.config.log_file)
-        output = subprocess.run(command, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            click.echo("Running command %s from %s." % (" ".join(command), cwd),
+                       file=self.config.log_file)
+        output = subprocess.run(command, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                check=True)
         self.config.log_file.write(output.stdout.decode("UTF-8"))
         self.config.log_file.write(output.stderr.decode("UTF-8"))
         if self.config.verbose:
-            click.echo("Command exited with status %s." % output.returncode, file=self.config.log_file)
+            click.echo("Command exited with status %s." % output.returncode,
+                       file=self.config.log_file)
         return output.returncode == 0
 
     def install_packages(self, packages, cwd=""):
@@ -55,12 +60,14 @@ class OsHelper(object):
 
     def write_file(self, file, content):
         if self.config.verbose:
-            click.echo("Writing contents\n %s \nto file %s." % (content, file), file=self.config.log_file)
+            click.echo("Writing contents\n %s \nto file %s." % (content, file),
+                       file=self.config.log_file)
         with open(file, "w") as file_handle:
             file_handle.write(content)
 
     def append_file(self, file, content):
         if self.config.verbose:
-            click.echo("Appending contents\n %s \nto file %s." % (content, file), file=self.config.log_file)
+            click.echo("Appending contents\n %s \nto file %s." % (content, file),
+                       file=self.config.log_file)
         with open(file, "a") as file_handle:
             file_handle.write(content)

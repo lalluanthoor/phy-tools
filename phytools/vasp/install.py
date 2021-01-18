@@ -1,7 +1,9 @@
-import click
-from phytools.helper import OsHelper
-from phytools.helper.nethelper import NetHelper
 import os
+
+import click
+
+from phytools.helper.oshelper import OsHelper
+from phytools.helper.nethelper import NetHelper
 
 VASP_MAKE_CONFIG = """
 # Precompiler options
@@ -89,11 +91,11 @@ MPI_INC    = /opt/gfortran/openmpi-1.10.2/install/ompi-1.10.2-GFORTRAN-5.4.1/inc
 """
 
 
-class Installer(object):
+class Installer:
+    REQUIRED_OS_PACKAGES = ["mpich", "libblas3", "libblas-dev", "liblapack3", "liblapack-dev",
+                            "build-essential", "gfortran", "rsync", "curl"]
 
     def __init__(self, config):
-        self.REQUIRED_OS_PACKAGES = ["mpich", "libblas3", "libblas-dev", "liblapack3", "liblapack-dev",
-                                     "build-essential", "gfortran", "rsync", "curl"]
         self.config = config
         self.os_helper = OsHelper(config)
         self.os_helper.validate()
@@ -124,17 +126,20 @@ class Installer(object):
         self.net_helper.download_file("http://fftw.org/fftw-3.3.8.tar.gz", "fftw.tar.gz")
         self.net_helper.download_file("http://www.netlib.org/blas/blas.tgz", "blas.tgz")
         self.net_helper.download_file("http://www.netlib.org/lapack/lapack-3.4.0.tgz", "lapack.tgz")
-        self.net_helper.download_file("http://www.netlib.org/scalapack/scalapack-2.0.2.tgz", "scalapack.tgz")
+        self.net_helper.download_file("http://www.netlib.org/scalapack/scalapack-2.0.2.tgz",
+                                      "scalapack.tgz")
 
         # extract the third-party libraries and VASP
         for file in ["fftw.tar.gz", "blas.tgz", "lapack.tgz", "scalapack.tgz"]:
             if not self.os_helper.extract_tar_file(file):
                 raise Exception("Unable to extract tar file %s" % file)
         if not self.os_helper.run_shell_command(
-                ["cp", os.path.join(self.config.vasp_source, "vasp.5.4.4.tar.gz"), self.config.dest_dir]):
+            ["cp", os.path.join(self.config.vasp_source, "vasp.5.4.4.tar.gz"),
+             self.config.dest_dir]):
             raise Exception("Unable to copy VASP source from %s." % self.config.vasp_source)
         if not self.os_helper.extract_tar_file("vasp.5.4.4.tar.gz", self.config.dest_dir):
-            raise Exception("Unable to extract vasp.5.4.4.tar.gz file from location %s", self.config.dest_dir)
+            raise Exception("Unable to extract vasp.5.4.4.tar.gz file from location %s" %
+                            self.config.dest_dir)
 
     def installation(self):
         # build FFTW
@@ -162,7 +167,8 @@ class Installer(object):
 
         # build ScaLapack
         scalapack_dir = os.path.join(self.config.dest_dir, "scalapack-2.0.2")
-        if not self.os_helper.run_shell_command(["cp", "SLmake.inc.example", "SLmake.inc"], scalapack_dir):
+        if not self.os_helper.run_shell_command(["cp", "SLmake.inc.example", "SLmake.inc"],
+                                                scalapack_dir):
             raise Exception("Coping configuration file for ScaLapack failed.")
         if not self.os_helper.run_shell_command(["make", "lib", "exe"], scalapack_dir):
             raise Exception("ScaLapack make failed.")
@@ -170,7 +176,8 @@ class Installer(object):
         # build VASP
         vasp_dir = os.path.join(self.config.dest_dir, "vasp.5.4.4")
         makefile_path = os.path.join(vasp_dir, "makefile.include")
-        self.os_helper.write_file(makefile_path, VASP_MAKE_CONFIG % (blas_dir, lapack_dir, scalapack_dir))
+        self.os_helper.write_file(makefile_path,
+                                  VASP_MAKE_CONFIG % (blas_dir, lapack_dir, scalapack_dir))
         if not self.os_helper.run_shell_command(["make", ], vasp_dir):
             raise Exception("VASP make failed.")
 
