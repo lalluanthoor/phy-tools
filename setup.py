@@ -1,12 +1,13 @@
-from setuptools import setup, find_packages
 from codecs import open
+
+from setuptools import setup, find_packages
 
 with open("README.md", "r", "utf-8") as readme:
     README = readme.read()
 
 setup(
     name="phytools",
-    version="0.1.1",
+    version="0.1.2",
     description="An installer toolkit for installing a bunch of common simulation tools",
     long_description=README,
     long_description_content_type="text/markdown",
