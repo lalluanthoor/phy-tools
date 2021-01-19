@@ -1,3 +1,4 @@
+"""Helper class for handling network related commands."""
 import os
 
 import click
@@ -5,11 +6,13 @@ import requests
 
 
 class NetHelper:
+    """Runs network commands."""
 
     def __init__(self, config):
         self.config = config
 
     def download_file(self, url, target_file):
+        """Downloads file from URL to target file."""
         if not str.startswith(target_file, self.config.dest_dir):
             target_file = os.path.join(self.config.dest_dir, target_file)
         if self.config.verbose:

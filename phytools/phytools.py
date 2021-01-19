@@ -1,7 +1,9 @@
+"""Main class for handling the CLI commands and groups."""
 import click
 
 
 class Config:
+    """Configuration class for storing installation configuration."""
 
     def __init__(self):
         self.verbose = False
