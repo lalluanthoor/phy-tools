@@ -1,3 +1,4 @@
+"""Helper class for handling OS related commands."""
 import os
 import platform
 import subprocess
@@ -6,6 +7,7 @@ import click
 
 
 class OsHelper:
+    """Runs shell commands."""
 
     def __init__(self, config):
         self.config = config
@@ -15,9 +17,11 @@ class OsHelper:
         self.version = platform.version()
 
     def get_as_string(self):
+        """Returns OS configuration."""
         return "%s - %s - %s" % (self.system, self.release, self.version)
 
     def validate(self):
+        """Validates OS."""
         supported_platforms = ["Linux", ]
         if self.config.verbose:
             click.echo(
@@ -34,6 +38,7 @@ class OsHelper:
             os.makedirs(self.config.dest_dir)
 
     def run_shell_command(self, command, cwd=""):
+        """Runs a shell command."""
         if cwd == "":
             cwd = self.config.dest_dir
         if self.config.verbose:
@@ -49,16 +54,19 @@ class OsHelper:
         return output.returncode == 0
 
     def install_packages(self, packages, cwd=""):
+        """Short cut for installing apt packages."""
         if self.config.verbose:
             click.echo("Installing packages %s." % ", ".join(packages), file=self.config.log_file)
         return self.run_shell_command(["sudo", "apt", "install", "-y"] + packages, cwd)
 
     def extract_tar_file(self, file, cwd=""):
+        """Extracts tar file."""
         if self.config.verbose:
             click.echo("Extracting tar file %s." % file, file=self.config.log_file)
         return self.run_shell_command(["tar", "xf", file], cwd)
 
     def write_file(self, file, content):
+        """Writes content into file."""
         if self.config.verbose:
             click.echo("Writing contents\n %s \nto file %s." % (content, file),
                        file=self.config.log_file)
@@ -66,6 +74,7 @@ class OsHelper:
             file_handle.write(content)
 
     def append_file(self, file, content):
+        """Appends content into file."""
         if self.config.verbose:
             click.echo("Appending contents\n %s \nto file %s." % (content, file),
                        file=self.config.log_file)

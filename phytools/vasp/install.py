@@ -1,3 +1,4 @@
+"""Install VASP and dependencies."""
 import os
 
 import click
@@ -92,6 +93,7 @@ MPI_INC    = /opt/gfortran/openmpi-1.10.2/install/ompi-1.10.2-GFORTRAN-5.4.1/inc
 
 
 class Installer:
+    """Installs VASP."""
     REQUIRED_OS_PACKAGES = ["mpich", "libblas3", "libblas-dev", "liblapack3", "liblapack-dev",
                             "build-essential", "gfortran", "rsync", "curl"]
 
@@ -102,6 +104,7 @@ class Installer:
         self.net_helper = NetHelper(config)
 
     def install(self):
+        """Main installation logic."""
         click.echo("Beginning installation of VASP.", file=self.config.log_file)
         if self.config.verbose:
             click.echo("Logs will be printed in verbose mode.", file=self.config.log_file)
@@ -116,6 +119,7 @@ class Installer:
         click.echo("Installation completed.", file=self.config.log_file)
 
     def pre_installation(self):
+        """Download and extract prerequisites."""
         # update package repositories and install packages
         if not self.os_helper.run_shell_command(["sudo", "apt", "update"]):
             raise Exception("Package repository update failed.")
@@ -142,6 +146,7 @@ class Installer:
                             self.config.dest_dir)
 
     def installation(self):
+        """Install prerequisites and VASP"""
         # build FFTW
         fftw_dir = os.path.join(self.config.dest_dir, "fftw-3.3.8")
         if not self.os_helper.run_shell_command(["./configure", ], fftw_dir):
@@ -182,6 +187,7 @@ class Installer:
             raise Exception("VASP make failed.")
 
     def post_installation(self):
+        """Updates .bashrc and cleans up archives."""
         vasp_dir = os.path.join(self.config.dest_dir, "vasp.5.4.4", "bin")
         bash_rc = os.path.join(os.path.expanduser("~"), ".bashrc")
         self.os_helper.append_file(bash_rc, "export PATH=$PATH:%s" % vasp_dir)
