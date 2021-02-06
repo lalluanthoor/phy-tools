@@ -3,8 +3,8 @@ import sys
 
 import click
 
-from phytools.exception.installationexception import InstallationException
-from phytools.helper.consolehelper import ConsoleHelper
+from phytoolkit.exception.installationexception import InstallationException
+from phytoolkit.helper.consolehelper import ConsoleHelper
 
 
 class Config:
@@ -57,7 +57,7 @@ def vasp(config, vasp_source):
     config.vasp_source = vasp_source
 
     try:
-        from phytools.vasp.installer import VaspInstaller
+        from phytoolkit.vasp.installer import VaspInstaller
         vasp_installer = VaspInstaller(config)
         vasp_installer.install()
     except InstallationException as exception:
@@ -73,7 +73,7 @@ def siesta(config, siesta_version):
     """Installs Siesta suite, including Siesta, TranSiesta, TBtrans."""
     try:
         config.siesta_version = siesta_version
-        from phytools.siesta.installer import SiestaInstaller
+        from phytoolkit.siesta.installer import SiestaInstaller
         siesta_installer = SiestaInstaller(config)
         siesta_installer.install()
     except InstallationException as exception:

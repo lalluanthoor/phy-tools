@@ -2,10 +2,10 @@
 
 from abc import ABC, abstractmethod
 
-from phytools.exception.installationexception import InstallationException
-from phytools.helper.consolehelper import ConsoleHelper
-from phytools.helper.nethelper import NetHelper
-from phytools.helper.oshelper import OsHelper
+from phytoolkit.exception.installationexception import InstallationException
+from phytoolkit.helper.consolehelper import ConsoleHelper
+from phytoolkit.helper.nethelper import NetHelper
+from phytoolkit.helper.oshelper import OsHelper
 
 
 class BaseInstaller(ABC):

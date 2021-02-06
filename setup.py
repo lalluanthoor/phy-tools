@@ -1,4 +1,4 @@
-"""Package configuration for phytools."""
+"""Package configuration for phytoolkit."""
 from codecs import open
 
 from setuptools import setup, find_packages
@@ -7,15 +7,15 @@ with open("README.md", "r", "utf-8") as readme:
     README = readme.read()
 
 setup(
-    name="phytools",
-    version="0.2.0",
+    name="phytoolkit",
+    version="0.2.1-alpha",
     description="An installer toolkit for installing a bunch of common simulation tools",
     long_description=README,
     long_description_content_type="text/markdown",
     license="MIT",
     author="Lallu Anthoor",
     author_email="lalluanthoor@gmail.com",
-    url="https://github.com/lalluanthoor/physics-tools",
+    url="https://github.com/lalluanthoor/phytools",
     packages=find_packages(),
     package_data={"": ["LICENSE", "README.md"]},
     include_package_data=True,
@@ -26,10 +26,11 @@ setup(
         "colorama>=0.4.4",
         "requests>=2.25.1",
     ],
-    entry_points="""
-    [console_scripts]
-    phytools=phytools.phytools:cli
-    """,
+    entry_points={
+        "console_scripts": [
+            "phytoolkit=phytoolkit.phytoolkit:cli"
+        ],
+    },
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Environment :: Console",

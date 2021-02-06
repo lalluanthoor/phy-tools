@@ -1,7 +1,7 @@
 """Install Siesta and dependencies."""
 import click
 
-from phytools.base.installer import BaseInstaller
+from phytoolkit.base.installer import BaseInstaller
 
 
 class SiestaInstaller(BaseInstaller):

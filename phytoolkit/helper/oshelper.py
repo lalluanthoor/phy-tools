@@ -3,7 +3,7 @@ import os
 import platform
 import subprocess
 
-from phytools.exception.installationexception import InstallationException
+from phytoolkit.exception.installationexception import InstallationException
 
 
 class OsHelper:

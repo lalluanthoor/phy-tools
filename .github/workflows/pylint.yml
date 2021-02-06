@@ -25,4 +25,4 @@ jobs:
           python -m pip install Click requests pylint
       - name: Analysing the code with pylint
         run: |
-          pylint phytools setup.py
+          pylint phytoolkit setup.py

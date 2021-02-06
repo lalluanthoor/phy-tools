@@ -1,8 +1,8 @@
 """Install VASP and dependencies."""
 import os
 
-from phytools.base.installer import BaseInstaller
-from phytools.exception.installationexception import InstallationException
+from phytoolkit.base.installer import BaseInstaller
+from phytoolkit.exception.installationexception import InstallationException
 
 VASP_MAKE_CONFIG = """
 # Precompiler options
