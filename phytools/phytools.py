@@ -1,6 +1,9 @@
 """Main class for handling the CLI commands and groups."""
+import sys
+
 import click
 
+from phytools.exception.installationexception import InstallationException
 from phytools.helper.consolehelper import ConsoleHelper
 
 
@@ -57,9 +60,9 @@ def vasp(config, vasp_source):
         from phytools.vasp.installer import VaspInstaller
         vasp_installer = VaspInstaller(config)
         vasp_installer.install()
-    except Exception as exception:
+    except InstallationException as exception:
         config.console.error(str(exception))
-        exit(1)
+        sys.exit(1)
 
 
 @install.command()
@@ -73,6 +76,6 @@ def siesta(config, siesta_version):
         from phytools.siesta.installer import SiestaInstaller
         siesta_installer = SiestaInstaller(config)
         siesta_installer.install()
-    except Exception as exception:
+    except InstallationException as exception:
         config.console.error(str(exception))
-        exit(1)
+        sys.exit(1)

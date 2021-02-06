@@ -1,9 +1,8 @@
 """Install VASP and dependencies."""
 import os
 
-import click
-
 from phytools.base.installer import BaseInstaller
+from phytools.exception.installationexception import InstallationException
 
 VASP_MAKE_CONFIG = """
 # Precompiler options
@@ -97,8 +96,9 @@ class VaspInstaller(BaseInstaller):
     def __init__(self, config):
         super().__init__(config)
         self.console = config.console
-        self.requiredOSPackages = ["mpich", "libblas3", "libblas-dev", "liblapack3",
-                                   "liblapack-dev", "build-essential", "gfortran", "rsync", "curl"]
+        self.required_os_packages = ["mpich", "libblas3", "libblas-dev", "liblapack3",
+                                     "liblapack-dev", "build-essential", "gfortran", "rsync",
+                                     "curl"]
 
     def pre_installation(self):
         """Download and extract prerequisites."""
@@ -112,13 +112,15 @@ class VaspInstaller(BaseInstaller):
         # extract the third-party libraries and VASP
         for file in ["fftw.tar.gz", "blas.tgz", "lapack.tgz", "scalapack.tgz"]:
             if not self.os_helper.extract_tar_file(file):
-                raise Exception("Unable to extract tar file %s" % file)
+                raise InstallationException("Unable to extract tar file %s" % file)
         source_dir = os.path.join(self.config.vasp_source, "vasp.5.4.4.tar.gz")
         if not self.os_helper.run_shell_command(["cp", source_dir, self.config.dest_dir]):
-            raise Exception("Unable to copy VASP source from %s." % self.config.vasp_source)
+            raise InstallationException(
+                "Unable to copy VASP source from %s." % self.config.vasp_source)
         if not self.os_helper.extract_tar_file("vasp.5.4.4.tar.gz", self.config.dest_dir):
-            raise Exception("Unable to extract vasp.5.4.4.tar.gz file from location %s" %
-                            self.config.dest_dir)
+            raise InstallationException(
+                "Unable to extract vasp.5.4.4.tar.gz file from location %s" %
+                self.config.dest_dir)
         self.console.info("Downloaded and extracted package archives.")
 
     def installation(self):
@@ -126,41 +128,41 @@ class VaspInstaller(BaseInstaller):
         # build FFTW
         fftw_dir = os.path.join(self.config.dest_dir, "fftw-3.3.8")
         if not self.os_helper.run_shell_command(["./configure", ], fftw_dir):
-            raise Exception("FFTW build configuration failed.")
+            raise InstallationException("FFTW build configuration failed.")
         self.console.verbose_success("FFTW configuration successful.")
         if not self.os_helper.run_shell_command(["make", ], fftw_dir):
-            raise Exception("FFTW make failed.")
+            raise InstallationException("FFTW make failed.")
         self.console.verbose_success("FFTW make successful.")
         if not self.os_helper.run_shell_command(["sudo", "make", "install"], fftw_dir):
-            raise Exception("FFTW installation failed.")
+            raise InstallationException("FFTW installation failed.")
         self.console.verbose_success("FFTW installation successful.")
 
         # build BLAS
         blas_dir = os.path.join(self.config.dest_dir, "BLAS-3.8.0")
         if not self.os_helper.run_shell_command(["make", ], blas_dir):
-            raise Exception("BLAS make failed.")
+            raise InstallationException("BLAS make failed.")
         self.console.verbose_success("BLAS make successful.")
         if not self.os_helper.run_shell_command(["cp", "blas_LINUX.a", "libblas.a"], blas_dir):
-            raise Exception("Copying BLAS to target failed.")
+            raise InstallationException("Copying BLAS to target failed.")
         self.console.verbose_success("Copied blas_LINUX.a to libblas.a.")
 
         # build Lapack
         lapack_dir = os.path.join(self.config.dest_dir, "lapack-3.4.0")
         if not self.os_helper.run_shell_command(["cp", "make.inc.example", "make.inc"], lapack_dir):
-            raise Exception("Coping configuration file for Lapack failed.")
+            raise InstallationException("Coping configuration file for Lapack failed.")
         self.console.verbose_info("Copied make.inc to installation directory.")
         if not self.os_helper.run_shell_command(["make", "lapack_install", "lib"], lapack_dir):
-            raise Exception("Lapack make failed.")
+            raise InstallationException("Lapack make failed.")
         self.console.verbose_success("Lapack make successful.")
 
         # build ScaLapack
         scalapack_dir = os.path.join(self.config.dest_dir, "scalapack-2.0.2")
         if not self.os_helper.run_shell_command(["cp", "SLmake.inc.example", "SLmake.inc"],
                                                 scalapack_dir):
-            raise Exception("Coping configuration file for ScaLapack failed.")
+            raise InstallationException("Coping configuration file for ScaLapack failed.")
         self.console.verbose_info("Copied SLmake.inc to installation directory.")
         if not self.os_helper.run_shell_command(["make", "lib", "exe"], scalapack_dir):
-            raise Exception("ScaLapack make failed.")
+            raise InstallationException("ScaLapack make failed.")
         self.console.verbose_success("ScaLapack make successful.")
 
         # build VASP
@@ -169,7 +171,7 @@ class VaspInstaller(BaseInstaller):
         self.os_helper.write_file(makefile_path,
                                   VASP_MAKE_CONFIG % (blas_dir, lapack_dir, scalapack_dir))
         if not self.os_helper.run_shell_command(["make", ], vasp_dir):
-            raise Exception("VASP make failed.")
+            raise InstallationException("VASP make failed.")
         self.console.success("VASP make successful.")
 
     def post_installation(self):

@@ -1,7 +1,9 @@
-"""Helper class for handling network related commands."""
+"""Helper module for handling network related commands."""
 import os
 
 import requests
+
+from phytools.exception.installationexception import InstallationException
 
 
 class NetHelper:
@@ -19,7 +21,7 @@ class NetHelper:
         response = requests.get(url)
         if response.status_code not in [200, "200"]:
             self.console.verbose_error("Download failed with status code %s" % response.status_code)
-            raise Exception("Download of file %s failed." % target_file)
+            raise InstallationException("Download of file %s failed." % target_file)
         with open(target_file, "wb") as file_handle:
             self.console.verbose_info("Download completed. Writing to file %s." % target_file)
             file_handle.write(response.content)

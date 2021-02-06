@@ -1,7 +1,9 @@
-"""Helper class for handling OS related commands."""
+"""Helper module for handling OS related commands."""
 import os
 import platform
 import subprocess
+
+from phytools.exception.installationexception import InstallationException
 
 
 class OsHelper:
@@ -25,12 +27,13 @@ class OsHelper:
         self.console.verbose_info(
             "Validating against supported platforms %s." % ", ".join(supported_platforms))
         if self.system not in supported_platforms:
-            raise Exception("Unsupported platform %s" % self.system)
+            raise InstallationException("Unsupported platform %s" % self.system)
         self.console.verbose_success("Platform %s is supported." % self.system)
 
         self.console.verbose_info("Checking for variant 'Ubuntu' in version.")
         if "Ubuntu" not in self.version:
-            raise Exception("Unsupported variant %s. Only 'Ubuntu' supported." % self.version)
+            raise InstallationException(
+                "Unsupported variant %s. Only 'Ubuntu' supported." % self.version)
         self.console.verbose_success("Variant %s is supported." % self.version)
 
         self.console.verbose_info("Installing to destination directory %s." % self.config.dest_dir)

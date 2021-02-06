@@ -1,17 +1,19 @@
+"""Module for common installation logic."""
+
 from abc import ABC, abstractmethod
 
-import click
-
+from phytools.exception.installationexception import InstallationException
 from phytools.helper.consolehelper import ConsoleHelper
 from phytools.helper.nethelper import NetHelper
 from phytools.helper.oshelper import OsHelper
 
 
 class BaseInstaller(ABC):
+    """Base installer with common installation operations and general behaviour."""
 
     def __init__(self, config):
         self.config = config
-        self.requiredOSPackages = []
+        self.required_os_packages = []
         self.console = ConsoleHelper(config.log_file, config.verbose)
 
         self.console.verbose_info("Initializing OS Helper.")
@@ -27,6 +29,7 @@ class BaseInstaller(ABC):
         self.console.verbose_success("Net Helper initialized.")
 
     def install(self):
+        """Controlling logic which calls other sub-steps."""
         self.console.verbose_info("Beginning installation.")
         self.console.verbose_info("OS details: %s" % self.os_helper.get_as_string())
 
@@ -47,26 +50,27 @@ class BaseInstaller(ABC):
         self.console.success("Installation completed.")
 
     def install_required_os_packages(self):
+        """Installs required packages on the OS."""
         if self.config.verbose:
             self.console.verbose_info("Updating package repository.")
         if not self.os_helper.run_shell_command(["sudo", "apt", "update"]):
-            raise Exception("Package repository update failed.")
+            raise InstallationException("Package repository update failed.")
         if self.config.verbose:
             self.console.verbose_success("Package repository updated.")
             self.console.verbose_info("Installing required OS packages.")
-        if not self.os_helper.install_packages(self.requiredOSPackages):
-            raise Exception("Installation of required packages failed.")
+        if not self.os_helper.install_packages(self.required_os_packages):
+            raise InstallationException("Installation of required packages failed.")
         if self.config.verbose:
             self.console.verbose_success("OS packages installed.")
 
     @abstractmethod
     def pre_installation(self):
-        pass
+        """Placeholder for pre-installation logic."""
 
     @abstractmethod
     def installation(self):
-        pass
+        """Placeholder for main installation logic."""
 
     @abstractmethod
     def post_installation(self):
-        pass
+        """Placeholder for post-installation logic."""

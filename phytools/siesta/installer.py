@@ -6,12 +6,12 @@ from phytools.base.installer import BaseInstaller
 
 class SiestaInstaller(BaseInstaller):
     """Installs Siesta suite."""
-    REQUIRED_OS_PACKAGES = ["python", "curl", "unzip", "hwloc", "sysstat", "build-essential",
-                            "g++", "gfortran", "libreadline-dev", "m4", "xsltproc", "mpich",
-                            "libmpich-dev"]
 
     def __init__(self, config):
         super().__init__(config)
+        self.required_os_packages = ["python", "curl", "unzip", "hwloc", "sysstat",
+                                     "build-essential", "g++", "gfortran", "libreadline-dev",
+                                     "m4", "xsltproc", "mpich", "libmpich-dev"]
 
     def pre_installation(self):
         pass
