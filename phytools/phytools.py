@@ -1,5 +1,10 @@
 """Main class for handling the CLI commands and groups."""
+import sys
+
 import click
+
+from phytools.exception.installationexception import InstallationException
+from phytools.helper.consolehelper import ConsoleHelper
 
 
 class Config:
@@ -7,6 +12,11 @@ class Config:
 
     def __init__(self):
         self.verbose = False
+        self.log_file = None
+        self.dest_dir = None
+        self.vasp_source = None
+        self.siesta_version = None
+        self.console = None
 
 
 pass_config = click.make_pass_decorator(Config, ensure=True)
@@ -31,6 +41,8 @@ def install(config, dest_dir, log_file):
     """Install a simulation tool on your system."""
     config.dest_dir = dest_dir
     config.log_file = log_file
+    config.console = ConsoleHelper(log_file, config.verbose)
+    config.console.verbose_info("Logging output in verbose mode.")
 
 
 @install.command()
@@ -43,11 +55,27 @@ def vasp(config, vasp_source):
     restrictions. Please obtain a copy of vasp-5.4.4.tar.gz file
     and provide the path as configuration."""
     config.vasp_source = vasp_source
-    from phytools.vasp.install import Installer
-    vasp_installer = Installer(config)
-    vasp_installer.install()
-    click.echo("Installation of VASP completed.", file=config.log_file)
-    click.echo("VASP binaries 'vasp_std', 'vasp_gam' and 'vasp_ncl' installed.",
-               file=config.log_file)
-    click.echo("Run 'source ~/.bashrc' or open a new terminal to start using VASP.",
-               file=config.log_file)
+
+    try:
+        from phytools.vasp.installer import VaspInstaller
+        vasp_installer = VaspInstaller(config)
+        vasp_installer.install()
+    except InstallationException as exception:
+        config.console.error(str(exception))
+        sys.exit(1)
+
+
+@install.command()
+@click.option("--siesta-version", type=click.Choice("4.1-b3", "4.1-b4"), default="4.1-b3",
+              help="Version of Siesta to be installed.")
+@pass_config
+def siesta(config, siesta_version):
+    """Installs Siesta suite, including Siesta, TranSiesta, TBtrans."""
+    try:
+        config.siesta_version = siesta_version
+        from phytools.siesta.installer import SiestaInstaller
+        siesta_installer = SiestaInstaller(config)
+        siesta_installer.install()
+    except InstallationException as exception:
+        config.console.error(str(exception))
+        sys.exit(1)

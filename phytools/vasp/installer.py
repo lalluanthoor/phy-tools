@@ -1,10 +1,8 @@
 """Install VASP and dependencies."""
 import os
 
-import click
-
-from phytools.helper.oshelper import OsHelper
-from phytools.helper.nethelper import NetHelper
+from phytools.base.installer import BaseInstaller
+from phytools.exception.installationexception import InstallationException
 
 VASP_MAKE_CONFIG = """
 # Precompiler options
@@ -92,40 +90,18 @@ MPI_INC    = /opt/gfortran/openmpi-1.10.2/install/ompi-1.10.2-GFORTRAN-5.4.1/inc
 """
 
 
-class Installer:
+class VaspInstaller(BaseInstaller):
     """Installs VASP."""
-    REQUIRED_OS_PACKAGES = ["mpich", "libblas3", "libblas-dev", "liblapack3", "liblapack-dev",
-                            "build-essential", "gfortran", "rsync", "curl"]
 
     def __init__(self, config):
-        self.config = config
-        self.os_helper = OsHelper(config)
-        self.os_helper.validate()
-        self.net_helper = NetHelper(config)
-
-    def install(self):
-        """Main installation logic."""
-        click.echo("Beginning installation of VASP.", file=self.config.log_file)
-        if self.config.verbose:
-            click.echo("Logs will be printed in verbose mode.", file=self.config.log_file)
-            click.echo("OS details: %s" % self.os_helper.get_as_string(), file=self.config.log_file)
-
-        click.echo("Running pre-installation steps.", file=self.config.log_file)
-        self.pre_installation()
-        click.echo("Running installation steps.", file=self.config.log_file)
-        self.installation()
-        click.echo("Running post-installation steps.", file=self.config.log_file)
-        self.post_installation()
-        click.echo("Installation completed.", file=self.config.log_file)
+        super().__init__(config)
+        self.console = config.console
+        self.required_os_packages = ["mpich", "libblas3", "libblas-dev", "liblapack3",
+                                     "liblapack-dev", "build-essential", "gfortran", "rsync",
+                                     "curl"]
 
     def pre_installation(self):
         """Download and extract prerequisites."""
-        # update package repositories and install packages
-        if not self.os_helper.run_shell_command(["sudo", "apt", "update"]):
-            raise Exception("Package repository update failed.")
-        if not self.os_helper.install_packages(self.REQUIRED_OS_PACKAGES):
-            raise Exception("Installation of required packages failed.")
-
         # download required third-party libraries
         self.net_helper.download_file("http://fftw.org/fftw-3.3.8.tar.gz", "fftw.tar.gz")
         self.net_helper.download_file("http://www.netlib.org/blas/blas.tgz", "blas.tgz")
@@ -136,47 +112,58 @@ class Installer:
         # extract the third-party libraries and VASP
         for file in ["fftw.tar.gz", "blas.tgz", "lapack.tgz", "scalapack.tgz"]:
             if not self.os_helper.extract_tar_file(file):
-                raise Exception("Unable to extract tar file %s" % file)
-        if not self.os_helper.run_shell_command(
-            ["cp", os.path.join(self.config.vasp_source, "vasp.5.4.4.tar.gz"),
-             self.config.dest_dir]):
-            raise Exception("Unable to copy VASP source from %s." % self.config.vasp_source)
+                raise InstallationException("Unable to extract tar file %s" % file)
+        source_dir = os.path.join(self.config.vasp_source, "vasp.5.4.4.tar.gz")
+        if not self.os_helper.run_shell_command(["cp", source_dir, self.config.dest_dir]):
+            raise InstallationException(
+                "Unable to copy VASP source from %s." % self.config.vasp_source)
         if not self.os_helper.extract_tar_file("vasp.5.4.4.tar.gz", self.config.dest_dir):
-            raise Exception("Unable to extract vasp.5.4.4.tar.gz file from location %s" %
-                            self.config.dest_dir)
+            raise InstallationException(
+                "Unable to extract vasp.5.4.4.tar.gz file from location %s" %
+                self.config.dest_dir)
+        self.console.info("Downloaded and extracted package archives.")
 
     def installation(self):
         """Install prerequisites and VASP"""
         # build FFTW
         fftw_dir = os.path.join(self.config.dest_dir, "fftw-3.3.8")
         if not self.os_helper.run_shell_command(["./configure", ], fftw_dir):
-            raise Exception("FFTW build configuration failed.")
+            raise InstallationException("FFTW build configuration failed.")
+        self.console.verbose_success("FFTW configuration successful.")
         if not self.os_helper.run_shell_command(["make", ], fftw_dir):
-            raise Exception("FFTW make failed.")
+            raise InstallationException("FFTW make failed.")
+        self.console.verbose_success("FFTW make successful.")
         if not self.os_helper.run_shell_command(["sudo", "make", "install"], fftw_dir):
-            raise Exception("FFTW installation failed.")
+            raise InstallationException("FFTW installation failed.")
+        self.console.verbose_success("FFTW installation successful.")
 
         # build BLAS
         blas_dir = os.path.join(self.config.dest_dir, "BLAS-3.8.0")
         if not self.os_helper.run_shell_command(["make", ], blas_dir):
-            raise Exception("BLAS make failed.")
+            raise InstallationException("BLAS make failed.")
+        self.console.verbose_success("BLAS make successful.")
         if not self.os_helper.run_shell_command(["cp", "blas_LINUX.a", "libblas.a"], blas_dir):
-            raise Exception("Copying BLAS to target failed.")
+            raise InstallationException("Copying BLAS to target failed.")
+        self.console.verbose_success("Copied blas_LINUX.a to libblas.a.")
 
         # build Lapack
         lapack_dir = os.path.join(self.config.dest_dir, "lapack-3.4.0")
         if not self.os_helper.run_shell_command(["cp", "make.inc.example", "make.inc"], lapack_dir):
-            raise Exception("Coping configuration file for Lapack failed.")
+            raise InstallationException("Coping configuration file for Lapack failed.")
+        self.console.verbose_info("Copied make.inc to installation directory.")
         if not self.os_helper.run_shell_command(["make", "lapack_install", "lib"], lapack_dir):
-            raise Exception("Lapack make failed.")
+            raise InstallationException("Lapack make failed.")
+        self.console.verbose_success("Lapack make successful.")
 
         # build ScaLapack
         scalapack_dir = os.path.join(self.config.dest_dir, "scalapack-2.0.2")
         if not self.os_helper.run_shell_command(["cp", "SLmake.inc.example", "SLmake.inc"],
                                                 scalapack_dir):
-            raise Exception("Coping configuration file for ScaLapack failed.")
+            raise InstallationException("Coping configuration file for ScaLapack failed.")
+        self.console.verbose_info("Copied SLmake.inc to installation directory.")
         if not self.os_helper.run_shell_command(["make", "lib", "exe"], scalapack_dir):
-            raise Exception("ScaLapack make failed.")
+            raise InstallationException("ScaLapack make failed.")
+        self.console.verbose_success("ScaLapack make successful.")
 
         # build VASP
         vasp_dir = os.path.join(self.config.dest_dir, "vasp.5.4.4")
@@ -184,10 +171,14 @@ class Installer:
         self.os_helper.write_file(makefile_path,
                                   VASP_MAKE_CONFIG % (blas_dir, lapack_dir, scalapack_dir))
         if not self.os_helper.run_shell_command(["make", ], vasp_dir):
-            raise Exception("VASP make failed.")
+            raise InstallationException("VASP make failed.")
+        self.console.success("VASP make successful.")
 
     def post_installation(self):
         """Updates .bashrc and cleans up archives."""
         vasp_dir = os.path.join(self.config.dest_dir, "vasp.5.4.4", "bin")
         bash_rc = os.path.join(os.path.expanduser("~"), ".bashrc")
         self.os_helper.append_file(bash_rc, "export PATH=$PATH:%s" % vasp_dir)
+        self.console.info("VASP binaries 'vasp_std', 'vasp_gam' and 'vasp_ncl' installed.")
+        self.console.info("Run 'source ~/.bashrc' or open a new terminal to start using VASP.")
+        self.console.success("Installation of VASP completed.")
