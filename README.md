@@ -13,7 +13,7 @@ It is only tested with Ubuntu 18.04 and 20.04 and Python 3. Rest of the platform
 
 ### Steps to install
 ```bash
-pip3 install phytools
+python3 -m pip install -i https://test.pypi.org/simple/ phytools
 ```
 
 ### Accessing documentation
@@ -23,4 +23,3 @@ phytools --help
 
 ## Notice
 VASP source is licensed content. It is not shipped with this tool. You need to obtain it from the authorized parties. See: https://www.vasp.at/faqs/
-
