@@ -41,17 +41,24 @@ class OsHelper:
             os.makedirs(self.config.dest_dir)
         self.console.verbose_success("Destination directory created.")
 
-    def run_shell_command(self, command, cwd=""):
+    def run_shell_command(self, command, cwd="", shell=False):
         """Runs a shell command."""
-        if cwd == "":
-            cwd = self.config.dest_dir
-        self.console.verbose_info("Running command %s from %s." % (" ".join(command), cwd))
-        output = subprocess.run(command, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                                check=True)
-        self.config.log_file.write(output.stdout.decode("UTF-8"))
-        self.config.log_file.write(output.stderr.decode("UTF-8"))
-        self.console.verbose_info("Command exited with status %s." % output.returncode)
-        return output.returncode == 0
+        try:
+            if cwd == "":
+                cwd = self.config.dest_dir
+            self.console.verbose_info("Running command %s from %s." % (" ".join(command), cwd))
+            output = subprocess.run(command, cwd=cwd, check=True, stdout=subprocess.PIPE,
+                                    stderr=subprocess.PIPE, shell=shell)
+            stdout_string = output.stdout.decode("UTF-8")
+            self.console.sout(stdout_string)
+            self.console.error(output.stderr.decode("UTF-8"))
+            self.console.verbose_info("Command exited with status %s." % output.returncode)
+            return output.returncode == 0 if not shell else stdout_string
+        except subprocess.CalledProcessError as cpe:
+            self.console.verbose_sout(cpe.output.decode("UTF-8"))
+            self.console.verbose_error(cpe.stderr.decode("UTF-8"))
+            self.console.verbose_error("Command exited with status %s." % cpe.returncode)
+            return False
 
     def install_packages(self, packages, cwd=""):
         """Short cut for installing apt packages."""

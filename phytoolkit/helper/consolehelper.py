@@ -18,6 +18,15 @@ class ConsoleHelper:
         if self.verbose:
             self.print(message, fg_color)
 
+    def sout(self, content):
+        """Prints the message in magenta color."""
+        self.print(content, 'magenta')
+
+    def verbose_sout(self, content):
+        """Prints the message in magenta color if verbose mode is enabled."""
+        if self.verbose:
+            self.print(content, 'magenta')
+
     def info(self, message):
         """Prints the message in blue colour."""
         self.print(message, 'blue')
