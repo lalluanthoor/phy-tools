@@ -66,7 +66,7 @@ def vasp(config, vasp_source):
 
 
 @install.command()
-@click.option("--siesta-version", type=click.Choice("4.1-b3", "4.1-b4"), default="4.1-b3",
+@click.option("--siesta-version", type=click.Choice(["4.1-b3", "4.1-b4"]), default="4.1-b3",
               help="Version of Siesta to be installed.")
 @pass_config
 def siesta(config, siesta_version):

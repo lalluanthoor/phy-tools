@@ -17,23 +17,23 @@ class BaseInstaller(ABC):
         self.console = ConsoleHelper(config.log_file, config.verbose)
 
         self.console.verbose_info("Initializing OS Helper.")
-        self.os_helper = OsHelper(config)
+        self.osh = OsHelper(config)
         self.console.verbose_success("OS Helper initialized.")
 
-        self.console.verbose_info("Validating OS and installation location.")
-        self.os_helper.validate()
-        self.console.verbose_success("Validation successful.")
+        # self.console.verbose_info("Validating OS and installation location.")
+        # self.os_helper.validate()
+        # self.console.verbose_success("Validation successful.")
 
         self.console.verbose_info("Initializing Net Helper.")
-        self.net_helper = NetHelper(config)
+        self.net = NetHelper(config)
         self.console.verbose_success("Net Helper initialized.")
 
     def install(self):
         """Controlling logic which calls other sub-steps."""
         self.console.verbose_info("Beginning installation.")
-        self.console.verbose_info("OS details: %s" % self.os_helper.get_as_string())
+        self.console.verbose_info("OS details: %s" % self.osh.get_as_string())
 
-        self.install_required_os_packages()
+        # self.install_required_os_packages()
 
         self.console.verbose_info("Running pre-installation steps.")
         self.pre_installation()
@@ -53,12 +53,12 @@ class BaseInstaller(ABC):
         """Installs required packages on the OS."""
         if self.config.verbose:
             self.console.verbose_info("Updating package repository.")
-        if not self.os_helper.run_shell_command(["sudo", "apt", "update"]):
+        if not self.osh.run_shell_command(["sudo", "apt", "update"]):
             raise InstallationException("Package repository update failed.")
         if self.config.verbose:
             self.console.verbose_success("Package repository updated.")
             self.console.verbose_info("Installing required OS packages.")
-        if not self.os_helper.install_packages(self.required_os_packages):
+        if not self.osh.install_packages(self.required_os_packages):
             raise InstallationException("Installation of required packages failed.")
         if self.config.verbose:
             self.console.verbose_success("OS packages installed.")
